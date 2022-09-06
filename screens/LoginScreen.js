@@ -42,8 +42,7 @@ const LoginScreen = () => {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
             />}
-            {/* <Button title='Login' onPress={() => setRegister(false)} />
-            <Button title='Register' onPress={() => setRegister(true)} /> */}
+            <Button title={showLogin ? 'Login' : 'Signup'}/>
         </View>
     )
 }
