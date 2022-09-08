@@ -1,12 +1,45 @@
 import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { auth } from '../firebase'
+import { useNavigation } from '@react-navigation/native'
 
 const LoginScreen = () => {
+    const navigation = useNavigation()
+
     const [username, setUsername] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [showLogin, setShowLogin] = useState(true)
+
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                navigation.replace('Home')
+            }
+        })
+
+        return unsubscribe
+    }, [])
+
+    const handleSignUp = () =>  {
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((authUser) => {
+                authUser.user.updateProfile({
+                    displayName: username
+                })
+            })
+            .catch(error => alert(error.message))
+    }
+
+    const handleLogIn = () => {
+        auth.signInWithEmailAndPassword(email, password)
+            .then(userCredentials => {
+                const user = userCredentials.user
+                console.log('Log in: ' + user.email)
+            })
+            .catch(error => alert(error.message))
+    }
 
     return (
         <View style={styles.container}>
@@ -22,27 +55,37 @@ const LoginScreen = () => {
                 style={styles.textInput}
                 placeholder='Username'
                 value={username}
+                autoCorrect={false}
+                autoCapitalize={false}
                 onChangeText={setUsername}
             />}
             <TextInput 
                 style={styles.textInput}
                 placeholder='Email'
                 value={email}
+                autoCorrect={false}
+                autoCapitalize={false}
                 onChangeText={setEmail}
             />
             <TextInput 
                 style={styles.textInput}
                 placeholder='Password'
                 value={password}
+                autoCorrect={false}
+                autoCapitalize={false}
                 onChangeText={setPassword}
             />
             {!showLogin && <TextInput 
                 style={styles.textInput}
                 placeholder='Confirm Password'
                 value={confirmPassword}
+                autoCorrect={false}
+                autoCapitalize={false}
                 onChangeText={setConfirmPassword}
             />}
-            <Button title={showLogin ? 'Login' : 'Signup'}/>
+
+            {showLogin && <Button title='Login' onPress={handleLogIn}/>}
+            {!showLogin && <Button title='Signup' onPress={handleSignUp}/>}
         </View>
     )
 }
